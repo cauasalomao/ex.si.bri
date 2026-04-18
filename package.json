@@ -1,0 +1,12 @@
+{
+  "name": "komplexa-scraper",
+  "version": "1.0.0",
+  "description": "Scraper para extrair conteúdo de sites de hotéis/pousadas e gerar briefing em Markdown — Komplexa Hotéis",
+  "main": "scraper.js",
+  "scripts": {
+    "scrape": "node scraper.js"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}
