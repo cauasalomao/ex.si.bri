@@ -55,7 +55,6 @@ const ICON_NAMES = new Set([
 // URLs que nunca devem ser visitadas
 const SKIP_PATTERNS = [
   /vendas\//i,
-  /\.php/i,
   /admin/i,
   /login/i,
   /logout/i,
@@ -196,13 +195,23 @@ async function extractPageContent(page) {
       } catch {}
     });
 
+    // Escolhe o candidato com mais conteúdo. Se nenhum tiver ao menos 60% do
+    // texto do clone, usa o clone inteiro — evita casos em que um seletor casa
+    // com um container pequeno (ex: .uk-container-center) e perde o resto.
+    const cloneTextLen = (clone.innerText || "").length;
+    const candidateSelectors = [
+      "main",
+      "[role='main']",
+      "article",
+      "[class*='content']",
+      "[class*='container']",
+    ];
+    const candidates = candidateSelectors
+      .flatMap((sel) => [...clone.querySelectorAll(sel)])
+      .map((el) => ({ el, len: (el.innerText || "").length }));
+    const best = candidates.sort((a, b) => b.len - a.len)[0];
     const mainContent =
-      clone.querySelector("main") ||
-      clone.querySelector("[role='main']") ||
-      clone.querySelector("article") ||
-      clone.querySelector("[class*='content']") ||
-      clone.querySelector("[class*='container']") ||
-      clone;
+      best && best.len >= cloneTextLen * 0.6 ? best.el : clone;
 
     const results = [];
     const seen = new Set();
